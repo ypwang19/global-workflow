@@ -115,7 +115,7 @@ class AerosolAnalysis(Task):
             FileHandler(bias_dict).sync()
             logger.debug(f"Bias correction files:\n{pformat(bias_dict)}")
 
-             # extract bias corrections
+            # extract bias corrections
             Jedi.extract_tar_from_filehandler_dict(bias_dict)
 
         # stage CRTM fix files
