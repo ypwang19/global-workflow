@@ -100,8 +100,6 @@
 #
 ################################################################################
 
-source "${USHgfs}/preamble.sh"
-
 CASE=${CASE:-C768}
 res=$(echo $CASE | cut -c2-)
 LONB_CASE=$((res*4))
@@ -133,7 +131,9 @@ export REDERR=${REDERR:-'2>'}
 ${INISCRIPT:-}
 pwd=$(pwd)
 cd "${DATA}" || exit 99
-[[ -d "${COMOUT_ATMOS_ANALYSIS}" ]] || mkdir -p "${COMOUT_ATMOS_ANALYSIS}"
+if [[ ! -d "${COMOUT_ATMOS_ANALYSIS}" ]]; then
+   mkdir -p "${COMOUT_ATMOS_ANALYSIS}"
+fi
 
 ################################################################################
 #  Make surface analysis

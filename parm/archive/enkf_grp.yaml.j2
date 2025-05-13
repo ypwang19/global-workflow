@@ -10,7 +10,7 @@ enkf_grp:
         {% set COMIN_ATMOS_RESTART_MEM = COMIN_ATMOS_RESTART_MEM_list[imem] %}
 
         # Forecast data
-        {% if RUN == 'enkfgdas' %}
+        {% if is_gdas %}
         {% for fhr in range(3, 10, 3) %}
         - "{{ COMIN_ATMOS_HISTORY_MEM | relpath(ROTDIR) }}/{{ head }}atmf{{ "%03d" % fhr }}.nc"
         {% endfor %}
@@ -23,9 +23,15 @@ enkf_grp:
         {% if not lobsdiag_forenkf %}
         - "{{ COMIN_ATMOS_RESTART_MEM | relpath(ROTDIR) }}/{{ head }}gsistat"
         {% endif %}
+        {% if DO_JEDIATMENS %}
+        {% for itile in range(6) %}
+        - "{{ COMIN_ATMOS_ANALYSIS_MEM | relpath(ROTDIR) }}/{{ head }}cubed_sphere_grid_ratminc.tile{{ itile+1 }}.nc"
+        {% endfor %}
+        {% else %}
         {% if do_calc_increment %}
         - "{{ COMIN_ATMOS_ANALYSIS_MEM | relpath(ROTDIR) }}/{{ head }}atmanl.nc"
         {% else %}
         - "{{ COMIN_ATMOS_ANALYSIS_MEM | relpath(ROTDIR) }}/{{ head }}ratminc.nc"
+        {% endif %}
         {% endif %}
         {% endfor %}  # first_group_mem to last_group_mem

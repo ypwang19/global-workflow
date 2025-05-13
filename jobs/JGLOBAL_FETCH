@@ -1,9 +1,10 @@
 #! /usr/bin/env bash
 
-source "${HOMEgfs}/ush/preamble.sh"
 source "${HOMEgfs}/ush/jjob_header.sh" -e "fetch" -c "base fetch"
 
 # Execute fetching
+# Do not export shell opts to the bash scripts in the htar/hsi wrappers
+export -n SHELLOPTS
 "${SCRgfs}/exglobal_fetch.py" 
 err=$?
 
@@ -18,6 +19,8 @@ fi
 # Remove the Temporary working directory
 ##########################################
 cd "${DATAROOT}" || (echo "${DATAROOT} does not exist. ABORT!"; exit 1)
-[[ ${KEEPDATA} = "NO" ]] && rm -rf "${DATA}"
+if [[ "${KEEPDATA}" == "NO" ]]; then
+    rm -rf "${DATA}"
+fi
 
 exit 0

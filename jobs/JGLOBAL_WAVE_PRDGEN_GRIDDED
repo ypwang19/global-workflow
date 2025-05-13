@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 
-source "${HOMEgfs}/ush/preamble.sh"
 source "${HOMEgfs}/ush/jjob_header.sh" -e "waveawipsgridded" -c "base wave waveawipsgridded"
 source "${USHgfs}/wave_domain_grid.sh"
 
@@ -34,15 +33,17 @@ fi
 # Execute the Script
 ###################################
 ${SCRgfs}/exgfs_wave_prdgen_gridded.sh
-status=$?
-[[ ${status} -ne 0 ]] && exit ${status}
+err=$?
+if [[ ${err} -ne 0 ]]; then
+    exit "${err}"
+fi
 
 ###################################
 # Remove temp directories
 ###################################
-cd ${DATAROOT}
+cd "${DATAROOT}" || true
 if [ "${KEEPDATA}" != "YES" ]; then
-  rm -rf ${DATA}
+  rm -rf "${DATA}"
 fi
 
 exit 0

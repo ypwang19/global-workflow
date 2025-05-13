@@ -17,8 +17,6 @@
 #
 ################################################################################
 
-source "${USHgfs}/preamble.sh"
-
 # Directories.
 pwd=$(pwd)
 
@@ -53,7 +51,9 @@ ENKF_SPREAD=${ENKF_SPREAD:-"NO"}
 ################################################################################
 #  Preprocessing
 ENKF_SUFFIX="s"
-[[ $SMOOTH_ENKF = "NO" ]] && ENKF_SUFFIX=""
+if [[ "${SMOOTH_ENKF}" == "NO" ]]; then
+    ENKF_SUFFIX=""
+fi
 
 ################################################################################
 # Copy executables to working directory
@@ -93,32 +93,36 @@ for fhr in $(seq $FHMIN $FHOUT $FHMAX); do
          ${NLN} "${COMIN_ATMOS_HISTORY}/${PREFIX}atmf${fhrchar}${ENKF_SUFFIX}.nc" "atmf${fhrchar}${ENKF_SUFFIX}_${memchar}"
       done
    fi
-   [[ $ENKF_SPREAD = "YES" ]] && ${NLN} "${COMOUT_ATMOS_HISTORY_STAT}/${PREFIX}atmf${fhrchar}.ensspread.nc" "atmf${fhrchar}.ensspread"
+   if [[ "${ENKF_SPREAD}" == "YES" ]]; then
+       ${NLN} "${COMOUT_ATMOS_HISTORY_STAT}/${PREFIX}atmf${fhrchar}.ensspread.nc" "atmf${fhrchar}.ensspread"
+   fi
 done
 
 ################################################################################
 # Generate ensemble mean surface and atmospheric files
 
-[[ $SMOOTH_ENKF = "YES" ]] && $NCP $HYBENSMOOTH ./hybens_smoothinfo
+if [[ "${SMOOTH_ENKF}" == "YES" ]]; then
+    $NCP "${HYBENSMOOTH}" ./hybens_smoothinfo
+fi
 
 rc=0
 for fhr in $(seq $FHMIN $FHOUT $FHMAX); do
    fhrchar=$(printf %03i $fhr)
 
-   export pgm=$GETSFCENSMEANEXEC
+   export pgm=${GETSFCENSMEANEXEC}
    . prep_step
 
-   $APRUN_EPOS ${DATA}/$(basename $GETSFCENSMEANEXEC) ./ sfcf${fhrchar}.ensmean sfcf${fhrchar} $NMEM_ENS
+   ${APRUN_EPOS} "${DATA}/$(basename ${GETSFCENSMEANEXEC})" ./ "sfcf${fhrchar}.ensmean" "sfcf${fhrchar}" "${NMEM_ENS}" && true
    ra=$?
    rc=$((rc+ra))
 
-   export_pgm=$GETATMENSMEANEXEC
+   export pgm=${GETATMENSMEANEXEC}
    . prep_step
 
    if [ $ENKF_SPREAD = "YES" ]; then
-      $APRUN_EPOS ${DATA}/$(basename $GETATMENSMEANEXEC) ./ atmf${fhrchar}.ensmean atmf${fhrchar} $NMEM_ENS atmf${fhrchar}.ensspread
+      ${APRUN_EPOS} "${DATA}/$(basename ${GETATMENSMEANEXEC})" ./ "atmf${fhrchar}.ensmean" "atmf${fhrchar}" "${NMEM_ENS}" "atmf${fhrchar}.ensspread" && true
    else
-      $APRUN_EPOS ${DATA}/$(basename $GETATMENSMEANEXEC) ./ atmf${fhrchar}.ensmean atmf${fhrchar} $NMEM_ENS
+      ${APRUN_EPOS} "${DATA}/$(basename ${GETATMENSMEANEXEC})" ./ "atmf${fhrchar}.ensmean" "atmf${fhrchar}" "${NMEM_ENS}" && true
    fi
    ra=$?
    rc=$((rc+ra))
@@ -159,4 +163,4 @@ fi
 #  Postprocessing
 cd $pwd
 
-exit $err
+exit "${err}"
